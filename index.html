@@ -23,30 +23,49 @@ class Vec3
     // Add other vector to this one and return the result
     add(other)
     {
-        return new Vec3(this.x + other.x, this.y + other.y, this.z + other.z)
+        return new Vec3(this.x + other.x, this.y + other.y, this.z + other.z);
     }
 
     // Subtract other vector from this one and return the result
-    minus(other){}
+    minus(other){
+        return new Vec3(this.x - other.x, this.y - other.y, this.z - other.z);
+    }
 
     // Multiply other vector by this one and return the result
-    multiply(other){}
+    multiply(other){
+        return new Vec3(this.x * other.x, this.y * other.y, this.z * other.z);
+    }
 
     // Scale this vector by the number scalar and return the result
-    scale(scalar){}
+    scale(scalar){
+        return new Vec3(this.x * scalar, this.y * scalar, this.z * scalar);
+    }
     
     // Calculate the dot product of this vector with the other and return the result
     dot(other) {}
 
     // Calculate and return the magnitude of this vector
-    magnitude() {}
+    magnitude() {
+        let mag = Math.sqrt((this.x ** 2) + (this.y ** 2) + (this.z ** 2));
+        return mag;
+    }
     
     // Calculate and return the magnitude of this vector without the square root
-    magnitudeSquared() {}
+    magnitudeSquared() {
+        let magSq = (this.x ** 2) + (this.y **2) + (this.z ** 2);
+        return magSq;
+    }
 
     // Return a normalised version of this vector
-    normalised() {}
+    normalised() {
+        return new Vec3(this.x / mag, this.y / mag, this.y / mag);
+    }
 }
+
+const v1 = new Vec3(1, 2, 3);
+const v2 = new Vec3(4, 5, 6);
+
+
 
 // A sphere in 3D space. Has centre, radius and colour all of which are Vec3s
 class Sphere
