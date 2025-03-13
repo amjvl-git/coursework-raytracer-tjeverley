@@ -58,19 +58,24 @@ class Vec3
 
     // Return a normalised version of this vector
     normalised() {
-        let mag = this.magnitude;
-        if (mag == 0) return new Vec3(0, 0, 0);
+        let mag = this.magnitude();
+        if (mag === 0) return new Vec3(0, 0, 0);
         return new Vec3(this.x / mag, this.y / mag, this.y / mag);
     }
 }
 
+const v0 = new Vec3(0, 0, 0);
 const v1 = new Vec3(1, 2, 3);
 const v2 = new Vec3(4, 5, 6);
 
-// console.log("v1 + v2", v1.add(v2));
-// console.log("v1 - v2", v1.minus(v2));
-// console.log("v1 x v2", v1.multiply(v2));
-// console.log("v1 scaled by 5", v1.scale(5))
+console.log("v1 + v2", v1.add(v2));
+console.log("v1 - v2", v1.minus(v2));
+console.log("v1 x v2", v1.multiply(v2));
+console.log("v1 scaled by 5", v1.scale(5))
+console.log("v1 . v2", v1.dot(v2));
+console.log("||v1||", v1.magnitude());
+console.log("||v1|| squared", v1.magnitudeSquared());
+console.log("v1 normalised", v1.normalised());
 
 // A sphere in 3D space. Has centre, radius and colour all of which are Vec3s
 class Sphere
@@ -86,7 +91,9 @@ class Sphere
     // a quadratic equation and return the t value of the ray for that point
     // If two solutions exist return the minus solution
     // If no solutions exist return -1
-    rayIntersects(ray)  {}
+    rayIntersects(ray)  {
+        
+    }
 }
 
 // Ray which has an origin and direction, both are Vec3s
@@ -100,12 +107,16 @@ class Ray
 
     // Calculate and return the point in space (a Vec3) for this ray for the given value of t
     pointAt(t) {
-        px = this.origin.x + (this.direction.x * t);
-        py = this.origin.y + (this.direction.y * t);
-        pz = this.origin.z + (this.direction.z * t);
+        let px = this.origin.x + (this.direction.x * t);
+        let py = this.origin.y + (this.direction.y * t);
+        let pz = this.origin.z + (this.direction.z * t);
         return new Vec3(px, py, pz);
     }
 }
+
+const r1 = new Ray(v0, v1);
+
+console.log("v1 when t=0.5", r1.pointAt(0.5))
 
 // The result of casting a ray into our scene
 // Position is the point where the ray intersects a sphere in the scene
@@ -185,7 +196,7 @@ let horizontal = new Vec3(viewportWidth, 0, 0);
 let vertical = new Vec3(0, viewportHeight, 0);
 let lowerLeftCorner = camPosition.minus(horizontal.scale(0.5)).minus(vertical.scale(0.5)).minus(new Vec3(0, 0, focalLength));
 
-let colour = new Vec3(0,0,0)
+let colour = new Vec3(0, 0, 0);
 
 for (let i = 0; i < imageWidth; i++)
 {
@@ -193,9 +204,13 @@ for (let i = 0; i < imageWidth; i++)
     {
         let u = i / (imageWidth-1);
         let v = j / (imageHeight-1);
-        colour.x = u * 255;
-        colour.y = v * 255;
-        setPixel(i,j,colour);
+        
+        // colour.x = u * 255;
+        // colour.y = v * 255;
+
+        let ray = new Ray(camPosition, lowerLeftCorner.add(horizontal.scale(u)).add(vertical.scale(v)).minus(camPosition));
+        colour = rayColour(ray).scale(255);
+        setPixel(i, j, colour);
     }
 }
 
