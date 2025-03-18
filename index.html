@@ -139,8 +139,12 @@ class RayCastResult
 function hit(ray, t, sphereIndex) {
     
     let intersectionPoint = ray.pointAt(Sphere.rayIntersects);
-    let intersectionMag = Math.sqrt((intersectionPoint.x ** 2) + (intersectionPoint.y ** 2) + (intersectionPoint.z ** 2));
-    let intersectionNormal = new Vec3((intersectionPoint.x / intersectionMag), (intersectionPoint.y / intersectionMag), (intersectionPoint.z / intersectionMag));
+    // let intersectionMag = Math.sqrt((intersectionPoint.x ** 2) + (intersectionPoint.y ** 2) + (intersectionPoint.z ** 2));
+    // let intersectionNormal = new Vec3((intersectionPoint.x / intersectionMag), (intersectionPoint.y / intersectionMag), (intersectionPoint.z / intersectionMag));
+
+    let dt = ray.distance * t;
+    let n = ray.origin.add(dt) - (Sphere.centre);
+    let intersectionNormal = Math.sqrt((n.x ** 2) + (n.y ** 2) + (n.z ** 2));
 
     return new RayCastResult(intersectionPoint, intersectionNormal, t, sphereIndex);
 }
@@ -180,12 +184,12 @@ function rayColour(ray)
     
     let crMag = Math.sqrt((castResult.x ** 2) + (castResult ** 2) + (castResult ** 2));
     let crNormal = new Vec3((castResult.x / crMag), (castResult.y / crMag), (castResult.z / crMag));
-    // return crNormal;
+    return crNormal;
 
     let diffuse = Math.max(crNormal.dot(negLightDirection), 0);
     let colour = new Vec3(diffuse, diffuse, diffuse);
 
-    return colour;
+    // return colour;
 }
 
 // Sets a pixel at (x, y) in the canvas with an RGB Vec3
