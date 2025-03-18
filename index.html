@@ -68,15 +68,6 @@ const v0 = new Vec3(0, 0, 0);
 const v1 = new Vec3(1, 2, 3);
 const v2 = new Vec3(4, 5, 6);
 
-// console.log("v1 + v2", v1.add(v2));
-// console.log("v1 - v2", v1.minus(v2));
-// console.log("v1 x v2", v1.multiply(v2));
-// console.log("v1 scaled by 5", v1.scale(5))
-// console.log("v1 . v2", v1.dot(v2));
-// console.log("||v1||", v1.magnitude());
-// console.log("||v1|| squared", v1.magnitudeSquared());
-// console.log("v1 normalised", v1.normalised());
-
 // A sphere in 3D space. Has centre, radius and colour all of which are Vec3s
 class Sphere
 {
@@ -98,10 +89,10 @@ class Sphere
         let c = cDot - (this.radius ** 2);
 
         let discriminate = (b ** 2) - ((a * c) * 4);
-        let t = ((b * -1) - (Math.sqrt(discriminate))) / (a * 2);
+        let t_quad = ((b * -1) - (Math.sqrt(discriminate))) / (a * 2);
 
         if (discriminate > 0) {
-            return t;
+            return ray.pointAt(t_quad);
         } else {
             return -1;
         }
@@ -126,9 +117,7 @@ class Ray
     }
 }
 
-const r1 = new Ray(v0, v1);
-
-// console.log("v1 when t=0.5", r1.pointAt(0.5))
+// const r1 = new Ray(v0, v1);
 
 // The result of casting a ray into our scene
 // Position is the point where the ray intersects a sphere in the scene
@@ -148,15 +137,9 @@ class RayCastResult
 
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
 function hit(ray, t, sphereIndex) {
-    // let intersectionPoint = Ray.origin + (Ray.direction * Sphere.rayIntersects);
-    // let oSquared = ((Ray.origin - Sphere.centre) ** 2);
-    // let dSquared = ((Ray.direction - Sphere.centre) ** 2);
-    // let intersectionMagnitude = Math.sqrt(oSquared + dSquared);
-    // let intersectionNormal = intersectionPoint / intersectionMagnitude
     
-    let intersectionPoint = this.position;
-    let intersectionNormal = this.normal;
-    t = Sphere.rayIntersects;
+    let intersectionPoint = ray.pointAt(Sphere.rayIntersects);
+    let intersectionNormal = intersectionPoint.normal;
 
     return new RayCastResult(intersectionPoint, intersectionNormal, t, sphereIndex);
 }
@@ -190,8 +173,8 @@ function rayColour(ray)
 {
     let castResult = traceRay(ray)
     if(castResult.t < 0) return backgroundColour(ray)
-    return new Vec3(1,0,0) // Red
-    // return castResult.normal;
+    // return new Vec3(1,0,0) // Red
+    return castResult.normal;
 }
 
 // Sets a pixel at (x, y) in the canvas with an RGB Vec3
