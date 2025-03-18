@@ -68,14 +68,14 @@ const v0 = new Vec3(0, 0, 0);
 const v1 = new Vec3(1, 2, 3);
 const v2 = new Vec3(4, 5, 6);
 
-console.log("v1 + v2", v1.add(v2));
-console.log("v1 - v2", v1.minus(v2));
-console.log("v1 x v2", v1.multiply(v2));
-console.log("v1 scaled by 5", v1.scale(5))
-console.log("v1 . v2", v1.dot(v2));
-console.log("||v1||", v1.magnitude());
-console.log("||v1|| squared", v1.magnitudeSquared());
-console.log("v1 normalised", v1.normalised());
+// console.log("v1 + v2", v1.add(v2));
+// console.log("v1 - v2", v1.minus(v2));
+// console.log("v1 x v2", v1.multiply(v2));
+// console.log("v1 scaled by 5", v1.scale(5))
+// console.log("v1 . v2", v1.dot(v2));
+// console.log("||v1||", v1.magnitude());
+// console.log("||v1|| squared", v1.magnitudeSquared());
+// console.log("v1 normalised", v1.normalised());
 
 // A sphere in 3D space. Has centre, radius and colour all of which are Vec3s
 class Sphere
@@ -92,7 +92,19 @@ class Sphere
     // If two solutions exist return the minus solution
     // If no solutions exist return -1
     rayIntersects(ray)  {
-        
+        let a = ray.direction.dot(ray.direction);
+        let b = (ray.direction.scale(2)).dot((ray.origin.minus(this.centre)));
+        let cDot = (ray.origin.minus(this.centre)).dot((ray.origin.minus(this.centre)));
+        let c = cDot - (this.radius ** 2);
+
+        let discriminate = (b ** 2) - ((a * c) * 4);
+        let t = ((b * -1) - (Math.sqrt(discriminate))) / (a * 2);
+
+        if (discriminate > 0) {
+            return t;
+        } else {
+            return -1;
+        }
     }
 }
 
@@ -116,7 +128,7 @@ class Ray
 
 const r1 = new Ray(v0, v1);
 
-console.log("v1 when t=0.5", r1.pointAt(0.5))
+// console.log("v1 when t=0.5", r1.pointAt(0.5))
 
 // The result of casting a ray into our scene
 // Position is the point where the ray intersects a sphere in the scene
@@ -135,7 +147,19 @@ class RayCastResult
 }
 
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
-function hit(ray, t, sphereIndex) {}
+function hit(ray, t, sphereIndex) {
+    // let intersectionPoint = Ray.origin + (Ray.direction * Sphere.rayIntersects);
+    // let oSquared = ((Ray.origin - Sphere.centre) ** 2);
+    // let dSquared = ((Ray.direction - Sphere.centre) ** 2);
+    // let intersectionMagnitude = Math.sqrt(oSquared + dSquared);
+    // let intersectionNormal = intersectionPoint / intersectionMagnitude
+    
+    let intersectionPoint = this.position;
+    let intersectionNormal = this.normal;
+    t = Sphere.rayIntersects;
+
+    return new RayCastResult(intersectionPoint, intersectionNormal, t, sphereIndex);
+}
 
 // Return a RayCastResult when a ray misses everything in the scene
 function miss()
@@ -146,7 +170,10 @@ function miss()
 // Check whether a ray hits anything in the scene and return a RayCast Result
 function traceRay(ray)
 {
-    return miss()
+    let sphere = spheres[0];
+    let t = sphere.rayIntersects(ray);
+    if (t < 0) return miss()
+    else return hit(ray, t, 0);
 }
 
 // Calculate and return the background colour based on the ray
@@ -164,6 +191,7 @@ function rayColour(ray)
     let castResult = traceRay(ray)
     if(castResult.t < 0) return backgroundColour(ray)
     return new Vec3(1,0,0) // Red
+    // return castResult.normal;
 }
 
 // Sets a pixel at (x, y) in the canvas with an RGB Vec3
@@ -205,14 +233,13 @@ for (let i = 0; i < imageWidth; i++)
         let u = i / (imageWidth-1);
         let v = j / (imageHeight-1);
         
-        // colour.x = u * 255;
-        // colour.y = v * 255;
-
         let ray = new Ray(camPosition, lowerLeftCorner.add(horizontal.scale(u)).add(vertical.scale(v)).minus(camPosition));
         colour = rayColour(ray).scale(255);
         setPixel(i, j, colour);
     }
 }
+
+
 
 </script>
 
