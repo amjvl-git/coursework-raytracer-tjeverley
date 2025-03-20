@@ -143,11 +143,14 @@ function hit(ray, t, sphereIndex) {
     let intersectionPoint = ray.pointAt(t);
     let intersectionNormal = intersectionPoint.minus(sphere.centre).normalised();
 
+    let specPow = 2;
     let rCap = Math.abs(lightDirection.minus(intersectionNormal).scale(2).multiply(intersectionNormal).dot(lightDirection));
-    let vCap = camPosition.minus(intersectionPoint);
-    console.log(vCap);
-
+    let vCapBase = camPosition.minus(intersectionPoint);
+    let vCap = new Vec3(Math.abs(vCapBase.x), Math.abs(vCapBase.y), Math.abs(vCapBase.z));
+    let spec = Math.max(vCap.scale(rCap), 0) ** specPow;
     
+    console.log(spec);
+
     return new RayCastResult(intersectionPoint, intersectionNormal, t, sphereIndex);
 }
 
