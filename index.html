@@ -143,14 +143,6 @@ function hit(ray, t, sphereIndex) {
     let intersectionPoint = ray.pointAt(t);
     let intersectionNormal = intersectionPoint.minus(sphere.centre).normalised();
 
-    let specPow = 2;
-    let rCap = Math.abs(lightDirection.minus(intersectionNormal).scale(2).multiply(intersectionNormal).dot(lightDirection));
-    let vCapBase = camPosition.minus(intersectionPoint);
-    let vCap = new Vec3(Math.abs(vCapBase.x), Math.abs(vCapBase.y), Math.abs(vCapBase.z));
-    let spec = Math.max(vCap.scale(rCap), 0) ** specPow;
-    
-    console.log(spec);
-
     return new RayCastResult(intersectionPoint, intersectionNormal, t, sphereIndex);
 }
 
@@ -194,9 +186,23 @@ function rayColour(ray)
     let castResult = traceRay(ray)
     if(castResult.t < 0) return backgroundColour(ray)
     
+    let sphere = spheres[castResult.sphereIndex];
+    let intersectionPoint = ray.pointAt(castResult.sphereIndex);
+    let intersectionNormal = intersectionPoint.minus(sphere.centre).normalised();
+
+    let specPow = 2;
+    let rCap = Math.abs(lightDirection.minus(intersectionNormal).scale(2).multiply(intersectionNormal).dot(lightDirection));
+    let vCapBase = camPosition.minus(intersectionPoint);
+    let vCap = new Vec3(Math.abs(vCapBase.x), Math.abs(vCapBase.y), Math.abs(vCapBase.z));
+    let v_r = (vCap.x * rCap) + (vCap.y * rCap) + (vCap.z * rCap);
+    let spec = Math.max((v_r), 0) ** specPow;
+
+    let ambientScalar = 0.05;
+    let specScalar = spec * 0.8;
+
     let albedo = spheres[castResult.sphereIndex].colour;
     let diffuse = Math.max(castResult.normal.dot(negLightDirection), 0);
-    let colour = albedo.scale(diffuse);
+    let colour = albedo.scale(ambientScalar + diffuse + specScalar);
 
     return colour;
 }
