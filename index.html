@@ -64,10 +64,6 @@ class Vec3
     }
 }
 
-const v0 = new Vec3(0, 0, 0);
-const v1 = new Vec3(1, 2, 3);
-const v2 = new Vec3(4, 5, 6);
-
 // A sphere in 3D space. Has centre, radius and colour all of which are Vec3s
 class Sphere
 {
@@ -118,8 +114,6 @@ class Ray
         return new Vec3(px, py, pz);
     }
 }
-
-// const r1 = new Ray(v0, v1);
 
 // The result of casting a ray into our scene
 // Position is the point where the ray intersects a sphere in the scene
@@ -178,6 +172,27 @@ function backgroundColour(ray)
     let blue = new Vec3(0.3, 0.5, 0.9);
     t = 0.5 * (ray.direction.y + 1.0);
     return white.scale(1 - t).add(blue.scale(t));
+}
+
+function shadow(ray)
+{
+    let castResult = traceRay(ray)
+    if(castResult.t < 0) return backgroundColour(ray)
+    
+    let sphere = spheres[castResult.sphereIndex];
+    let intersectionPoint = ray.pointAt(castResult.sphereIndex);
+    let intersectionNormal = intersectionPoint.minus(sphere.centre).normalised();
+    
+    let specPow = 2;
+    let rCapNeg = Math.abs(negLightDirection.minus(intersectionNormal).scale(2).multiply(intersectionNormal).dot(negLightDirection));
+    let vCapBase = camPosition.minus(intersectionPoint);
+    let vCap = new Vec3(Math.abs(vCapBase.x), Math.abs(vCapBase.y), Math.abs(vCapBase.z));
+    let v_rNeg = (vCap.x * rCapNeg) + (vCap.y * rCapNeg) + (vCap.z * rCapNeg);
+    let specShade = Math.max((v_rNeg), 0) ** specPow;
+    
+    let shadeScalar = specShade * 0.8;
+
+    return shadeScalar;
 }
 
 // Returns the colour the ray should have as a Vec3 with RGB values in [0,1]
@@ -254,8 +269,6 @@ for (let i = 0; i < imageWidth; i++)
         setPixel(i, j, colour);
     }
 }
-
-
 
 </script>
 
