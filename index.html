@@ -192,6 +192,8 @@ function gammaCorrect(colour, gamma = 2.2) {
     );
 }
 
+let specPow = 2;
+
 // Returns the colour the ray should have as a Vec3 with RGB values in [0,1]
 function rayColour(ray) 
 {
@@ -212,7 +214,6 @@ function rayColour(ray)
     
     let spec = 0;
     if (!inShadow) {
-        let specPow = 2;
         let rCap = lightDirection.minus(intersectionNormal.scale(2).multiply(lightDirection)).normalised();
         let vCapBase = camPosition.minus(intersectionPoint);
         let vCap = new Vec3(Math.abs(vCapBase.x), Math.abs(vCapBase.y), Math.abs(vCapBase.z));
@@ -220,9 +221,9 @@ function rayColour(ray)
         spec = Math.max((v_r), 0) ** specPow;
     }
 
-    let ambientScalar = 0.2;
+    let ambientScalar = 0.05;
     let specScalar = spec * 0.8;
-    let diffuseScalar = 1;
+    let diffuseScalar = 0.5;
     let albedo = spheres[castResult.sphereIndex].colour;
     let colour = albedo.scale(ambientScalar + (diffuse * diffuseScalar) + specScalar);
 
