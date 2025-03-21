@@ -64,10 +64,6 @@ class Vec3
     }
 }
 
-const v0 = new Vec3(0, 0, 0);
-const v1 = new Vec3(1, 2, 3);
-const v2 = new Vec3(4, 5, 6);
-
 // A sphere in 3D space. Has centre, radius and colour all of which are Vec3s
 class Sphere
 {
@@ -119,8 +115,6 @@ class Ray
     }
 }
 
-// const r1 = new Ray(v0, v1);
-
 // The result of casting a ray into our scene
 // Position is the point where the ray intersects a sphere in the scene
 // Normal is the normal unit vector of the sphere at the intersection point
@@ -156,7 +150,7 @@ function miss()
 function traceRay(ray)
 {
     let t = 1000000
-    let = closestSphereIndex = -1;
+    let closestSphereIndex = -1;
     
     for (let i = 0; i < spheres.length; i++){
         let current_t = spheres[i].rayIntersects(ray);
@@ -180,15 +174,62 @@ function backgroundColour(ray)
     return white.scale(1 - t).add(blue.scale(t));
 }
 
+function shadow(ray)
+{
+    let castResult = traceRay(ray);
+
+    if (castResult.t > 0) {
+        return true;
+    }
+    return false;
+}
+
+function gammaCorrect(colour, gamma = 2.2) {
+    return new Vec3(
+        Math.pow(colour.x, 1 / gamma),
+        Math.pow(colour.y, 1 / gamma),
+        Math.pow(colour.z, 1 / gamma)
+    );
+}
+
 // Returns the colour the ray should have as a Vec3 with RGB values in [0,1]
 function rayColour(ray) 
 {
     let castResult = traceRay(ray)
     if(castResult.t < 0) return backgroundColour(ray)
     
+    let sphere = spheres[castResult.sphereIndex];
+    let intersectionPoint = ray.pointAt(castResult.t);
+    let intersectionNormal = intersectionPoint.minus(sphere.centre).normalised();
+
+    let shadowRay = new Ray(intersectionPoint, negLightDirection);
+    let inShadow = shadow(shadowRay);
+    
+    let diffuse = 0;
+    if (!inShadow) {
+        diffuse = Math.max(intersectionNormal.dot(negLightDirection), 0);
+    }
+    
+    let spec = 0;
+    if (!inShadow) {
+        let specPow = 2;
+        let rCap = lightDirection.minus(intersectionNormal.scale(2).multiply(lightDirection)).normalised();
+        let vCapBase = camPosition.minus(intersectionPoint);
+        let vCap = new Vec3(Math.abs(vCapBase.x), Math.abs(vCapBase.y), Math.abs(vCapBase.z));
+        let v_r = vCap.dot(rCap);
+        spec = Math.max((v_r), 0) ** specPow;
+    }
+
+    let ambientScalar = 0.2;
+    let specScalar = spec * 0.8;
+    let diffuseScalar = 1;
     let albedo = spheres[castResult.sphereIndex].colour;
-    let diffuse = Math.max(castResult.normal.dot(negLightDirection), 0);
-    let colour = albedo.scale(diffuse);
+    let colour = albedo.scale(ambientScalar + (diffuse * diffuseScalar) + specScalar);
+
+    let intensity = 0.8;
+    colour = colour.scale(intensity);
+
+    colour = gammaCorrect(colour);
 
     return colour;
 }
@@ -240,8 +281,6 @@ for (let i = 0; i < imageWidth; i++)
         setPixel(i, j, colour);
     }
 }
-
-
 
 </script>
 
